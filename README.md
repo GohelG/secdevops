@@ -9,12 +9,14 @@ This project addresses the security gaps in modern containerized workflows by au
 - 🔐 **The Solution**: An automated security scanner built directly into the CI/CD pipeline.
 - 🚩 **The Impact**: Eradicates manual checks, delivers instant security reports, and ensures only verified images reach production.Option 3: Technical & DevOps-Align
 
+---
 ## 🎯Project Goals
 - **Automate Security Audits**: Build a container image scanner that automatically cross-references code against established CVE databases before production deployment.
 - **Streamline Pipeline Integration**: Embed the scanner natively into standard CI/CD workflows, specifically targeting Jenkins and GitHub Actions.
 - **Visualize Security Health**: Launch a centralized dashboard tracking historical data on detected, resolved, and outstanding vulnerabilities.  
 - **Accelerate Incident Response**: Deliver comprehensive vulnerability logs and trigger instant alerts via Slack and Microsoft Teams.
 
+---
 ## 🧰 Technology Stack 
 |**Category**|**Tools & Technologies**|**Project Purpose**|
 |---|---|---|
@@ -23,3 +25,15 @@ This project addresses the security gaps in modern containerized workflows by au
 |**DevOps** 🚀| GitHub Actions, Jenkins, GitLab CI/CD | Continuous automation and pipeline gatekeeping |
 |**Observability** 📊| Prometheus, Grafana | Data logging and historical trend dashboarding |
 |**Alerting** 💬| Slack API, MS Teams API | Instant ChatOps notifications for engineering teams |
+
+---
+## 🤝Contributors
+- Saleem Shaikh
+- Abdulkadir Boxwala
+- Manikanadan Muthu
+- Gautam Gohel
+
+---
+
+<p align="center"><i>"Stopping vulnerabilities before they reach production.🛑"</i></p>
+  
