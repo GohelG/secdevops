@@ -14,3 +14,12 @@ This project addresses the security gaps in modern containerized workflows by au
 - **Streamline Pipeline Integration**: Embed the scanner natively into standard CI/CD workflows, specifically targeting Jenkins and GitHub Actions.
 - **Visualize Security Health**: Launch a centralized dashboard tracking historical data on detected, resolved, and outstanding vulnerabilities.  
 - **Accelerate Incident Response**: Deliver comprehensive vulnerability logs and trigger instant alerts via Slack and Microsoft Teams.
+
+## 🧰 Technology Stack 
+|**Category**|**Tools & Technologies**|**Project Purpose**|
+|---|---|---|
+|**Core Dev** 🐳| Python, Bash, Docker | Build scripts, pipeline execution, Image management |
+|**Security** 🛡️| Trivy, Clair, CVE Database| Automated container scanning and threat definition lookup |
+|**DevOps** 🚀| GitHub Actions, Jenkins, GitLab CI/CD | Continuous automation and pipeline gatekeeping |
+|**Observability** 📊| Prometheus, Grafana | Data logging and historical trend dashboarding |
+|**Alerting** 💬| Slack API, MS Teams API | Instant ChatOps notifications for engineering teams |
