@@ -1,10 +1,5 @@
 # 🛡️ Container Image Vulnerability Scanner with Reporting
 
-[![Security Code Scanning](https://github.com)](https://github.com)
-[![License: MIT](https://shields.io)](https://opensource.org)
-[![Docker Support](https://shields.io)](https://docker.com)
-[![Terraform Support](https://shields.io)](https://github.io)
-
 An automated, pipeline-integrated DevSecOps solution designed to scan container images, enforce security compliance gates, distribute real-time alerts, and aggregate historical vulnerability trends.
 
 ---
@@ -136,11 +131,6 @@ Before deployment, verify your local system has the following CLI tools installe
 * **Abdulkadir Boxwala** 
 * **Manikanadan Muthu** 
 * **Gautam Gohel** 
-
----
-
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more details.
 
 ---
 <p align="center"><i>"Stopping vulnerabilities before they reach production. 🛑"</i></p>
