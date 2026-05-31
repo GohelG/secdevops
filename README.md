@@ -1,5 +1,5 @@
 ---
-<h1 aling="center"> Project: Container Image Vulnerability Scanner with Reporting
+Project: Container Image Vulnerability Scanner with Reporting
 ---  
 ## 🏗️ Project Overview
 
