@@ -1,0 +1,13 @@
+# Trivy.ymal
+scan:
+  type: 'image'
+  format: 'json'
+  exit:code: '1'
+  severity: 'HIGH,CRITICAL'
+
+report:
+  output: 'trivy_report.json'
+
+vuln:
+  type: 'os, library'
+  ignorefile: '.trivyignor'    

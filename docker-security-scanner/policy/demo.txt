@@ -1,0 +1,8 @@
+# .trivyignore
+# Sprint 5: Approved known vulnerabilities / false positives exceptions
+
+# Example 1: Accepted risk in development environment
+CVE-2023-4527
+
+# Example 2: Patched upstream but waiting on vendor release
+CVE-2024-22667
