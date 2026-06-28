@@ -221,7 +221,7 @@ host = 127.0.0.1:3306
 name = grafana_db
 user = grafana_db_user
 ```
-### Step 4.6: Config Firewall Service 
+### Step 4.7: Config Firewall Service 
 ```bash
 sudo ufw enable
 sudo ufw allow 3000
@@ -229,7 +229,7 @@ sudo uft status
 ```
 NOTE: _Make sure your SSH port is enabled; otherwise, your SSH server will be disturbed, and we will be unable to access the server._
 
-### Step 4.7: Initial UI Login Portal
+### Step 4.8: Initial UI Login Portal
 Open your web browser and navigate to: `http://localhost:3000` (or your remote server's IP address).
 
 * **Default Username**: `admin`
