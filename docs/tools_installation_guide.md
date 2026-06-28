@@ -53,7 +53,7 @@ sudo docker run hello-world
 1. **Create the docker group and add your user:**
    ```bash
    sudo groupadd docker
-   sudo usermod -aG docker \$USER
+   sudo usermod -aG docker $USER
    ```
 
 2. **Apply the new group membership changes:**
