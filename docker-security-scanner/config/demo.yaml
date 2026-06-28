@@ -6,7 +6,7 @@ scan:
   severity: 'HIGH,CRITICAL'
 
 report:
-  output: 'trivy_report.json'
+  output: 'trivy_report.html'
 
 vuln:
   type: 'os, library'
