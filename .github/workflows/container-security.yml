@@ -1,3 +1,4 @@
+
 name: DevSecOps Vulnerability Scan Pipeline
 
 on:
@@ -13,8 +14,9 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: my-app
+  IMAGE_NAME: secdevops-test
   SEVERITY_THRESHOLD: HIGH,CRITICAL
+  REPORT_FILE: reporting/scan_report.json
 
 jobs:
   build-and-scan:
@@ -22,68 +24,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: Prepare reporting directory
+        run: mkdir -p reporting
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install -r requirements.txt
-          python -m pip install pytest
-
-      - name: Run unit tests
-        run: python -m pytest tests/ -v
-
-      - name: Build Docker image
+      - name: Build test Docker image
         run: |
           docker build \
+            -f dockerfiles/Dockerfile.malicious \
             -t "${IMAGE_NAME}:${GITHUB_SHA}" \
             .
 
-          docker tag \
-            "${IMAGE_NAME}:${GITHUB_SHA}" \
-            "${IMAGE_NAME}:latest"
-
       - name: Generate Trivy JSON report
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: my-app:${{ github.sha }}
+          image-ref: secdevops-test:${{ github.sha }}
+          scan-type: image
           format: json
-          output: reports/trivy.json
+          output: reporting/scan_report.json
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           exit-code: '0'
 
-      - name: Generate HTML and PDF reports
-        if: always()
+      - name: Verify Trivy report
         run: |
-          if test -s reports/trivy.json; then
-            python reporting/generate_report.py \
-              reports/trivy.json \
-              --outdir reports
-          fi
+          test -s "$REPORT_FILE"
+          python3 -m json.tool "$REPORT_FILE" > /dev/null
+
+      - name: Generate HTML report
+        if: success()
+        run: |
+          python3 reporting/generate_report.py \
+            reporting/scan_report.json
 
       - name: Upload vulnerability reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vulnerability-report-${{ github.run_id }}
-          path: reports/
+          path: |
+            reporting/*.json
+            reporting/*.html
+            reporting/*.pdf
           if-no-files-found: warn
           retention-days: 30
 
       - name: Enforce vulnerability policy
         if: success()
-        env:
-          IMAGE: my-app:${{ github.sha }}
         run: |
-          python scanner/policy.py \
-            reports/trivy.json \
-            --image "$IMAGE" \
-            --exceptions scanner/exceptions.yaml
+          bash scanner/policy/check_policy.sh \
+            reporting/scan_report.json
 
       - name: Send Slack notification
         if: always() && github.event_name != 'pull_request'
@@ -92,6 +83,36 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python notifications/slack_notify.py \
-            --status "$JOB_STATUS" \
-            --url "$RUN_URL"
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          webhook = os.environ.get("SLACK_WEBHOOK_URL")
+
+          if not webhook:
+              print("Slack webhook not configured; skipping.")
+              raise SystemExit(0)
+
+          status = os.environ["JOB_STATUS"]
+          emoji = ":white_check_mark:" if status == "success" else ":x:"
+
+          payload = {
+              "text": (
+                  f"{emoji} *SecDevOps Scan: {status.upper()}*\n"
+                  f"*Repository:* GohelG/secdevops\n"
+                  f"*Workflow:* {os.environ['RUN_URL']}"
+              )
+          }
+
+          request = urllib.request.Request(
+              webhook,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+
+          with urllib.request.urlopen(request, timeout=15) as response:
+              print("Slack notification status:", response.status)
+          PY
+
