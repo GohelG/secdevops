@@ -4,7 +4,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-
   workflow_dispatch:
   schedule:
     - cron: '0 8 * * 1-5'
@@ -19,16 +18,26 @@ concurrency:
 jobs:
   build-and-scan:
     name: Build, Scan All Local Images, Report and Notify
-    runs-on: ubuntu-latest 
-    
+    runs-on: ubuntu-latest
+
     env:
       IMAGE_NAME: secdevops-test
       SEVERITY_THRESHOLD: HIGH,CRITICAL
       REPORT_DIR: reporting/runs/${{ github.run_id }}-${{ github.run_attempt }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update && sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://github.io | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://github.io $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update && sudo apt-get install -y trivy
+
+      - name: Prepare Report Directory
+        run: mkdir -p "${{ env.REPORT_DIR }}"
 
       - name: Check prerequisites
         run: |
@@ -59,7 +68,7 @@ jobs:
         with:
           name: vulnerability-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.REPORT_DIR }}/
-          if-no-files-found: warn
+          if-no-files-found: ignore
           retention-days: 30
 
       - name: Send Slack notification
@@ -80,10 +89,15 @@ jobs:
               request=urllib.request.Request(url,data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'},method='POST')
               with urllib.request.urlopen(request,timeout=15) as response: print('Slack HTTP',response.status)
           PY
+
       - name: Fail job if scan or policy failed
         if: always()
         env:
           SCAN_OUTCOME: ${{ steps.scan.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
         run: |
-          test "$SCAN_OUTCOME" = success && test "$POLICY_OUTCOME" = success
+          if [ "$SCAN_OUTCOME" != "success" ] || [ "$POLICY_OUTCOME" != "success" ]; then
+            echo "Critical: Security scan or policy verification failed!"
+            exit 1
+          fi
+
