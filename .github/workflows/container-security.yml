@@ -2,54 +2,96 @@ name: DevSecOps Vulnerability Scan Pipeline
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [main, develop]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
+  workflow_dispatch:
   schedule:
-    - cron: '0 8 * * 1-5' # Daily baseline scan (Sprint 3)
+    - cron: '0 8 * * 1-5'
+
+permissions:
+  contents: read
 
 env:
-  IMAGE_NAME: "my-app"
-  IMAGE_TAG: "${{ github.sha }}"
-  SEVERITY_THRESHOLD: "HIGH,CRITICAL" # Configuration threshold (Sprint 2)
+  IMAGE_NAME: my-app
+  SEVERITY_THRESHOLD: HIGH,CRITICAL
 
 jobs:
   build-and-scan:
+    name: Build, Scan, Report and Notify
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
         run: |
-          docker build -t ${{ env.IMAGE_NAME }}:${--env.IMAGE_TAG } .
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
+          python -m pip install -r requirements.txt
+          python -m pip install pytest
 
-      - name: Run Trivy Vulnerability Scanner (Sprint 1 & 2)
-        uses: aquasecurity/trivy-action@master
+      - name: Run unit tests
+        run: python -m pytest tests/ -v
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t "${IMAGE_NAME}:${GITHUB_SHA}" \
+            .
+
+          docker tag \
+            "${IMAGE_NAME}:${GITHUB_SHA}" \
+            "${IMAGE_NAME}:latest"
+
+      - name: Generate Trivy JSON report
+        uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
-          format: 'json'
-          output: 'trivy-report.json' # Structured report generation (Sprint 3)
-          severity: '${{ env.SEVERITY_THRESHOLD }}'
-          exit-code: '1' # Fails the pipeline if vulnerabilities matching threshold are caught (Sprint 2)
-          ignore-unfixed: true
-          trivyignores: '.trivyignore' # Advanced exception handling lookup (Sprint 5)
+          image-ref: my-app:${{ github.sha }}
+          format: json
+          output: reports/trivy.json
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          exit-code: '0'
 
-      - name: Upload Security Report Artifact
+      - name: Generate HTML and PDF reports
+        if: always()
+        run: |
+          if test -s reports/trivy.json; then
+            python reporting/generate_report.py \
+              reports/trivy.json \
+              --outdir reports
+          fi
+
+      - name: Upload vulnerability reports
+        if: always()
         uses: actions/upload-artifact@v4
-        if: always() # Ensures reports are preserved even if the scanning phase fails
         with:
-          name: vulnerability-report
-          path: trivy-report.json
+          name: vulnerability-report-${{ github.run_id }}
+          path: reports/
+          if-no-files-found: warn
           retention-days: 30
 
-      - name: Send Slack Notification (Sprint 3)
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-          text: 'Vulnerability Scan Complete. Status: ${{ job.status }}. View artifact log for detailed breakdown.'
+      - name: Enforce vulnerability policy
+        if: success()
+        env:
+          IMAGE: my-app:${{ github.sha }}
+        run: |
+          python scanner/policy.py \
+            reports/trivy.json \
+            --image "$IMAGE" \
+            --exceptions scanner/exceptions.yaml
+
+      - name: Send Slack notification
+        if: always() && github.event_name != 'pull_request'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always() 
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python notifications/slack_notify.py \
+            --status "$JOB_STATUS" \
+            --url "$RUN_URL"

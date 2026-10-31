@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-OUTPUT_DIR="/home/devsecops/container-vulnerability-scanner/reporting"
-BASE_DIR="/home/devsecops/container-vulnerability-scanner/scanner"
+OUTPUT_DIR="/home/devsecops/secdevops/reporting"
+BASE_DIR="/home/devsecops/secdevops/scanner"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -15,7 +15,7 @@ IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>")
 for IMAGE_NAME in $IMAGES; do
     echo "--------------------------------------------------"
     echo "=== Executing Trivy Vulnerability Scan for: $IMAGE_NAME ==="
-    
+
     # Sanitize image name to use as a safe filename (e.g., library/ubuntu:latest -> library_ubuntu_latest)
     SAFE_NAME=$(echo "$IMAGE_NAME" | tr '/:' '__')
     REPORT_FILE="$OUTPUT_DIR/scan_report_${SAFE_NAME}.json"
@@ -23,22 +23,22 @@ for IMAGE_NAME in $IMAGES; do
     # Run Trivy scan
     docker run --rm \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      -v "$BASE_DIR/config:/home/devsecops/container-vulnerability-scanner/scanner/config" \
-      -v "$OUTPUT_DIR:/home/devsecops/container-vulnerability-scanner/reporting" \
+      -v "$BASE_DIR/config:/home/devsecops/secdevops/scanner/config" \
+      -v "$OUTPUT_DIR:/home/devsecops/secdevops/reporting" \
       aquasec/trivy:latest image \
       --format json \
-      --config "/home/devsecops/container-vulnerability-scanner/scanner/config/trivy.yml" \
-      --output "/home/devsecops/container-vulnerability-scanner/reporting/scan_report_${SAFE_NAME}.json" \
+      --config "/home/devsecops/secdevops/scanner/config/trivy.yml" \
+      --output "/home/devsecops/secdevops/reporting/scan_report_${SAFE_NAME}.json" \
       "$IMAGE_NAME"
 
     echo "Scan report generated at $REPORT_FILE"
 
     # 3. Process metrics and alert per image
     echo "==== Processing Metrics & Sending Alert for $IMAGE_NAME ==="
-    # Note: If your python script expects the filename as an argument, pass it here like: 
+    # Note: If your python script expects the filename as an argument, pass it here like:
     # python3 .../generate_report.py "$REPORT_FILE"
-    python3 /home/devsecops/container-vulnerability-scanner/reporting/generate_report.py
-    
+    python3 /home/devsecops/secdevops/reporting/generate_report.py
+
     echo "Scan report alert sending on slack for $IMAGE_NAME"
 done
 
