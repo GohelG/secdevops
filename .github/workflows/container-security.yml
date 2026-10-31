@@ -1,48 +1,58 @@
 name: DevSecOps Vulnerability Scan Pipeline
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
+
   workflow_dispatch:
   schedule:
     - cron: '0 8 * * 1-5'
+
 permissions:
   contents: read
+
 concurrency:
   group: container-security-${{ github.ref }}
   cancel-in-progress: false
+
 jobs:
   build-and-scan:
     name: Build, Scan All Local Images, Report and Notify
-    runs-on: [self-hosted, linux, x64, devsecops]
-    timeout-minutes: 90
+    runs-on: ubuntu-latest 
+    
     env:
       IMAGE_NAME: secdevops-test
       SEVERITY_THRESHOLD: HIGH,CRITICAL
       REPORT_DIR: reporting/runs/${{ github.run_id }}-${{ github.run_attempt }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Check prerequisites
         run: |
           docker info >/dev/null
           trivy --version
           python3 --version
+
       - name: Build new test image
         run: |
           docker build -f dockerfiles/Dockerfile.malicious -t "${IMAGE_NAME}:${GITHUB_SHA}" .
+
       - name: Scan new image first, then every other local image
         id: scan
         continue-on-error: true
         env:
           NEW_IMAGE: secdevops-test:${{ github.sha }}
         run: bash scanner/scripts/scan.sh
+
       - name: Enforce JSON policy on every image
         id: policy
         if: steps.scan.outcome == 'success'
         continue-on-error: true
         run: bash scanner/policy/check_policy.sh "$REPORT_DIR"
+
       - name: Upload scan reports and policy summary
         if: always()
         uses: actions/upload-artifact@v4
@@ -51,6 +61,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/
           if-no-files-found: warn
           retention-days: 30
+
       - name: Send Slack notification
         if: always() && github.event_name != 'pull_request'
         env:
