@@ -1,6 +1,4 @@
-
 name: DevSecOps Vulnerability Scan Pipeline
-
 on:
   push:
     branches: [main, develop]
@@ -9,110 +7,72 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 8 * * 1-5'
-
 permissions:
   contents: read
-
-env:
-  IMAGE_NAME: secdevops-test
-  SEVERITY_THRESHOLD: HIGH,CRITICAL
-  REPORT_FILE: reporting/scan_report.json
-
+concurrency:
+  group: container-security-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   build-and-scan:
-    name: Build, Scan, Report and Notify
-    runs-on: ubuntu-latest
-
+    name: Build, Scan All Local Images, Report and Notify
+    runs-on: [self-hosted, linux, x64, devsecops]
+    timeout-minutes: 90
+    env:
+      IMAGE_NAME: secdevops-test
+      SEVERITY_THRESHOLD: HIGH,CRITICAL
+      REPORT_DIR: reporting/runs/${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Prepare reporting directory
-        run: mkdir -p reporting
-
-      - name: Build test Docker image
+      - name: Check prerequisites
         run: |
-          docker build \
-            -f dockerfiles/Dockerfile.malicious \
-            -t "${IMAGE_NAME}:${GITHUB_SHA}" \
-            .
-
-      - name: Generate Trivy JSON report
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: secdevops-test:${{ github.sha }}
-          scan-type: image
-          format: json
-          output: reporting/scan_report.json
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          exit-code: '0'
-
-      - name: Verify Trivy report
+          docker info >/dev/null
+          trivy --version
+          python3 --version
+      - name: Build new test image
         run: |
-          test -s "$REPORT_FILE"
-          python3 -m json.tool "$REPORT_FILE" > /dev/null
-
-      - name: Generate HTML report
-        if: success()
-        run: |
-          python3 reporting/generate_report.py \
-            reporting/scan_report.json
-
-      - name: Upload vulnerability reports
+          docker build -f dockerfiles/Dockerfile.malicious -t "${IMAGE_NAME}:${GITHUB_SHA}" .
+      - name: Scan new image first, then every other local image
+        id: scan
+        continue-on-error: true
+        env:
+          NEW_IMAGE: secdevops-test:${{ github.sha }}
+        run: bash scanner/scripts/scan.sh
+      - name: Enforce JSON policy on every image
+        id: policy
+        if: steps.scan.outcome == 'success'
+        continue-on-error: true
+        run: bash scanner/policy/check_policy.sh "$REPORT_DIR"
+      - name: Upload scan reports and policy summary
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: vulnerability-report-${{ github.run_id }}
-          path: |
-            reporting/*.json
-            reporting/*.html
-            reporting/*.pdf
+          name: vulnerability-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.REPORT_DIR }}/
           if-no-files-found: warn
           retention-days: 30
-
-      - name: Enforce vulnerability policy
-        if: success()
-        run: |
-          bash scanner/policy/check_policy.sh \
-            reporting/scan_report.json
-
       - name: Send Slack notification
         if: always() && github.event_name != 'pull_request'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          JOB_STATUS: ${{ job.status }}
+          SCAN_OUTCOME: ${{ steps.scan.outcome }}
+          POLICY_OUTCOME: ${{ steps.policy.outcome }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python3 - <<'PY'
-          import json
-          import os
-          import urllib.request
-
-          webhook = os.environ.get("SLACK_WEBHOOK_URL")
-
-          if not webhook:
-              print("Slack webhook not configured; skipping.")
-              raise SystemExit(0)
-
-          status = os.environ["JOB_STATUS"]
-          emoji = ":white_check_mark:" if status == "success" else ":x:"
-
-          payload = {
-              "text": (
-                  f"{emoji} *SecDevOps Scan: {status.upper()}*\n"
-                  f"*Repository:* GohelG/secdevops\n"
-                  f"*Workflow:* {os.environ['RUN_URL']}"
-              )
-          }
-
-          request = urllib.request.Request(
-              webhook,
-              data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json"},
-              method="POST",
-          )
-
-          with urllib.request.urlopen(request, timeout=15) as response:
-              print("Slack notification status:", response.status)
+          import json,os,urllib.request
+          url=os.getenv('SLACK_WEBHOOK_URL')
+          if not url:
+              print('Slack webhook not configured; skipping')
+          else:
+              payload={'text':f"SecDevOps scan: {os.environ['SCAN_OUTCOME']} | policy: {os.environ['POLICY_OUTCOME']} | {os.environ['RUN_URL']}"}
+              request=urllib.request.Request(url,data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'},method='POST')
+              with urllib.request.urlopen(request,timeout=15) as response: print('Slack HTTP',response.status)
           PY
-
+      - name: Fail job if scan or policy failed
+        if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.scan.outcome }}
+          POLICY_OUTCOME: ${{ steps.policy.outcome }}
+        run: |
+          test "$SCAN_OUTCOME" = success && test "$POLICY_OUTCOME" = success
