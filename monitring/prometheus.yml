@@ -1,7 +1,6 @@
 global:
-  scrape_interval: 15s
-
+  scrape_interval: 30s
 scrape_configs:
-  - job_name: 'trivy-scanner'
+  - job_name: secdevops
     static_configs:
-      - targets: ['localhost:9100'] 
+      - targets: ['exporter:9108']
