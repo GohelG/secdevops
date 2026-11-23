@@ -1,156 +1,616 @@
-# 🛡️ Container Image Vulnerability Scanner with Reporting
+**Capstone Project**
 
-An automated, pipeline-integrated DevSecOps solution designed to scan container images, enforce security compliance gates, distribute real-time alerts, and aggregate historical vulnerability trends.
+**Container Image Vulnerability Scanner with Reporting**
 
----
+**Assignment Name -** Container Image Vulnerability Scanner with Reporting
 
-## 🏗️ Project Overview
+**Created by -** Gautam Gohel, Saleem Shaikh, Punit Patel, Abdulkadir Boxwala
 
-This project addresses critical security gaps in modern containerized workflows by automating vulnerability management. DevOps pipelines often skip or manually handle container image scanning due to a lack of native tooling. 
+**Batch - 16A**
 
-This project delivers a CI/CD-integrated vulnerability scanner that automatically checks images against known exploit databases. It automates the gatekeeping process, shifting security left and guaranteeing that only compliant container images are deployed.
+**Date - Oct 31st, 2026**
 
-* **The Challenge**: DevOps teams lack seamless tools to catch container vulnerabilities, risking insecure production deployments.
-* **The Solution**: An automated security scanner built directly into the CI/CD pipeline ecosystem.
-* **The Impact**: Eradicates manual checks, delivers instant security reports, and ensures only verified images reach production environments.
+**GIT Repo - [<u>https://github.com/saleeminfodevops/secdevops.git</u>](https://github.com/saleeminfodevops/secdevops.git)**
 
----
+**Updated Document Link - [<u>https://docs.google.com/document/d/1EQq9ZQ6r5vhlbLKhOe246gi9TYp4PXvanYFe-uUuYBQ/edit?usp=sharing</u>](https://docs.google.com/document/d/1EQq9ZQ6r5vhlbLKhOe246gi9TYp4PXvanYFe-uUuYBQ/edit?usp=sharing)**
 
-## 🎯 Project Goals
+**<u>Tools Used</u>**
 
-* **Automate Security Audits**: Build a container image scanner that automatically cross-references code against established CVE databases before production deployment.
-* **Streamline Pipeline Integration**: Embed the scanner natively into standard CI/CD workflows, specifically targeting Jenkins, GitHub Actions, and GitLab CI/CD.
-* **Visualize Security Health**: Launch a centralized dashboard tracking historical data on detected, resolved, and outstanding vulnerabilities.  
-* **Accelerate Incident Response**: Deliver comprehensive vulnerability logs and trigger instant alerts via Slack and Microsoft Teams.
+\- **Cloud:** AWS
 
----
+\- **Programming Languages:** Python (for scripting and integrating CVE checks), Bash (for CI/CD pipeline integration)
 
-## 🧰 Technology Stack
+\- **Vulnerability Database:** CVE database, Trivy to scan container images
 
+\- **Alerting and Notification:** Slack API Hook For sending alerts and notifications
 
-| Category | Tools & Technologies | Project Purpose |
-| :--- | :--- | :--- |
-| **Core Dev** 🐳 | Python, Bash, Docker | Build scripts, pipeline execution, container engine |
-| **Security** 🛡️ | Trivy, Clair, CVE Database | Automated container scanning and threat definition lookup |
-| **DevOps** 🚀 | GitHub Actions, Jenkins, GitLab CI/CD | Continuous automation and pipeline gatekeeping |
-| **Observability** 📊 | Prometheus, Grafana | Metric collection, logging, and historical trend dashboarding |
-| **Alerting** 💬 | Slack API, MS Teams API | Instant ChatOps notifications for engineering teams |
+\- **CI/CD Integration**: GitHub Actions
 
----
+**- Monitoring and Tracking**: Prometheus and Grafana for tracking vulnerability trends over time
 
-## 📁 Repository Directory Structure
+\- **Containerization**: Docker to pull, build, and scan container images
 
-## 🏗️ Project Architecture & Directory Layout
+**<u>Problem Statement</u>**
 
-```text
-container-vulnerability-scanner
-├── .github
-│   └── workflows
-│       └── container-security.yml  # GitHub Actions CI Automation
-├── Jenkinsfile
-│   └── container-security.groovy # Jenkins Multi-stage Pipeline
-├── dashboard
-│   ├── docker-compose.yml        # Telemetry UI Core Engine Stack
-│   └── grafana-dashboard.json    # Pre-built Metric Visualizations
-├── dockerfiles
-│   └── Dockerfile.malicious       # Local Testing Sandbox Target
-├── docs
-│   └── README.md                 # Project Setup & Architecture Guides
-├── monitoring
-│   ├── docker-compose.yml        # Shared Prometheus Scraping Stack
-│   └── prometheus.yml            # Data Collection Configurations
-├── reporting
-│   ├── generate_report.py        # Python Notification & Parser Engine
-│   └── ubuntu_1804_report.json   # Structural Data Output Sample
-└── scanner
-    ├── .trivyignore              # Risk Exceptions & Whitelist File
-    ├── config
-    │   └── trivy.yml             # Global Engine Flag Defaults
-    ├── policy
-    │   └── check_policy.sh       # Execution Policy & Retry Handler
-    └── scripts
-        └── scan.sh               # Core Scan CLI Wrapper Script
-```
+With the rise in containerized applications, securing container images is critical to prevent vulnerabilities from reaching production. However, DevOps teams often lack automated tools that integrate seamlessly into their CI/CD pipelines, resulting in manual checks or no checks at all. This project aims to develop an automated vulnerability scanner that scans container images for known vulnerabilities, integrates with CI/CD pipelines, and reports results, ensuring only secure images are deployed.
 
----
+**Project Goals**
 
-## 🚀 Getting Started
+1\. Develop a vulnerability scanner that automatically scans container images before they are pushed to production, based on known vulnerability databases like the CVE database.
 
-### Prerequisites
-Before deployment, verify your local system has the following CLI tools installed:
-* [Docker Desktop / Engine](https://docker.com) (v20.10+)
-* [Trivy CLI](https://github.iolatest/getting-started/installation/)
-* [Prometheus & Grafana](https://prometheus.io)
+2\. Integrate the scanner into popular CI/CD pipelines (e.g., Jenkins, GitHub Actions) to ensure continuous security checks.
 
-### 🛠️ Local Installation & Usage
+3\. Generate detailed vulnerability reports and send real-time notifications via Slack or Teams, allowing DevOps teams to take immediate action.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com
-   cd container-vulnerability-scanner
-   ```
+4\. Create a user-friendly dashboard that provides a historical view of vulnerabilities detected, resolved, and pending fixes.
 
-2. **Run an isolated manual container image scan**:
-   ```bash
-   # Scan a target image and filter strictly by High and Critical threats
-   trivy image --severity HIGH,CRITICAL nginx:alpine
-   ```
+**Project Sprints**
 
-3. **Execute the automation wrapper script**:
-   ```bash
-   # Provide executable permissions to the scanner utility script
-   chmod +x scanner/scripts/scan_image.sh
-   
-   # Run the custom automated engine to output structured text
-   ./scanner/scripts/scan_image.sh --image=python:3.9-slim --format=json
-   ```
+Each sprint has a 20-hour workload, organized into specific tasks for incremental progress.
 
----
+<img src="images/media/image7.png" style="width:6.5in;height:3.83333in" />
 
-## 🔄 Project Roadmap & Sprint Delivery
+<img src="images/media/image15.png" style="width:6.5in;height:3.22222in" />
 
-### Sprint 1: Initial Setup and Basic Vulnerability Scanning
-* **Tasks**: Built repository skeleton layout; configured standalone Trivy/Clair environments; performed initial sample image vulnerability checks; connected live CVE database sync feeds.
-* **Goal**: Establish a functional image parsing tool footprint.
+<img src="images/media/image3.png" style="width:6.5in;height:3.45833in" />
 
-### Sprint 2: Integrating Vulnerability Scanning with CI/CD Pipelines
-* **Tasks**: Wrote pipeline scripts for GitHub Actions/Jenkins; built strict build-failure logic flags tied to risk severities; exposed threshold configuration variables.
-* **Goal**: Embed security gates directly into active deployment paths.
+**Sprint 1: Initial Setup and Basic Vulnerability Scanning**
 
-### Sprint 3: Report Generation and Notification System
-* **Tasks**: Built modules generating structured PDF, HTML, and JSON files; linked webhook handlers to Slack/Teams APIs; configured automated daily threat summary digests.
-* **Goal**: Push structural vulnerability insights directly to engineering teams.
+\- Set up the project repository and define the folder structure.
 
-### Sprint 4: Web Dashboard for Historical Vulnerability Tracking
-* **Tasks**: Mounted operational Grafana graphing dashboards; exposed active scanner metrics to Prometheus collection engines; filtered views by individual image name and risk scope.
-* **Goal**: Provide long-term observability into security health and trends.
+[<u>https://github.com/saleeminfodevops/secdevops.git</u>](https://github.com/saleeminfodevops/secdevops.git)
 
-### Sprint 5: Advanced Scanner Customization and Exception Handling
-* **Tasks**: Configured targeted policy ignore lists (`.trivyignore`); built scheduling utilities for automated image rescans; developed graceful error-retry handling logic inside pipelines.
-* **Goal**: Deliver a flexible policy scanning ecosystem that minimizes false alarms.
+<img src="images/media/image10.png" style="width:6.5in;height:3.15278in" />
 
-### Sprint 6: Documentation, Testing, and Final Deployment
-* **Tasks**: Produced deployment runbooks; performed extensive multi-platform CI engine regression checks; collected and implemented user feedback updates.
-* **Goal**: Deliver a polished, production-ready DevSecOps pipeline asset.
+<img src="images/media/image6.png" style="width:6.5in;height:1.33333in" />
 
----
+<img src="images/media/image5.png" style="width:3.44271in;height:3.37281in" />
 
-## 📦 Summary of Project Deliverables
+\- Install and configure the Trivy vulnerability scanner to scan Docker images.
 
-1. **Automated Vulnerability Scanner**: Core vulnerability assessment engine utilizing updated CVE data feeds.
-2. **CI/CD Gate Integration**: Reusable workflow pipelines configured to block high-risk image builds.
-3. **Real-Time Notification Engine**: Live messaging hooks feeding structured alerts into Slack or Teams.
-4. **Web Security Dashboard**: Grafana tracking configurations summarizing historical compliance metrics over time.
-5. **Operational Runbook**: Comprehensive setup, deployment script, and custom policy exception manuals.
+<img src="images/media/image2.png" style="width:6.5in;height:3.05556in" />
 
----
+\- Pull a few sample images and perform initial vulnerability scans to understand output and logs.
 
-## 🤝 Contributors
+<img src="images/media/image12.png" style="width:6.5in;height:3.44444in" />
 
-* **Saleem Shaikh** 
-* **Abdulkadir Boxwala** 
-* **Punit Patel**  
-* **Gautam Gohel** 
+\- Explore CVE database integration for real-time vulnerability checks.
 
----
-<p align="center"><i>"Stopping vulnerabilities before they reach production. 🛑"</i></p>
+<img src="images/media/image2.png" style="width:6.5in;height:3.05556in" />
+
+\- **Goal Achieved:** Establish the foundation by setting up a basic image scanning process and verifying scanner output.
+
+**Sprint 2: Integrating Vulnerability Scanning with CI/CD Pipelines**
+
+\- Develop scripts to automate the scanning process for new container images in GitHub Actions.
+
+<img src="images/media/image14.png" style="width:6.5in;height:3.81944in" />
+
+\- Test CI/CD integration with sample images.
+
+<img src="images/media/image8.png" style="width:6.5in;height:3.20833in" />
+
+**Goal Achieved:** Ensure the vulnerability scanner works as part of the CI/CD pipeline, preventing builds from passing if vulnerabilities are detected.
+
+**Sprint 3: Report Generation and Notification System**
+
+\- Create a report generation module that organizes scan results in a structured format (PDF, HTML, or JSON).
+
+<img src="images/media/image11.png" style="width:6.5in;height:5.36111in" />
+
+<img src="images/media/image13.png" style="width:6.5in;height:5.36111in" />
+
+\- Integrate with the Slack API to send scan summaries and alerts to designated channels.
+
+<img src="images/media/image4.png" style="width:6.5in;height:1.58333in" />
+
+<img src="images/media/image8.png" style="width:6.5in;height:2.50282in" />
+
+<img src="images/media/image16.png" style="width:6.5in;height:3.30527in" />
+
+**- Goal Achieved:** Develop a reporting and notification system that keeps the DevOps team informed of vulnerabilities.
+
+**Sprint 4: Web Dashboard for Historical Vulnerability Tracking**
+
+\- Set up a simple web dashboard using Grafana (or a custom UI) to visualize vulnerability trends over time.
+
+\- Connect the dashboard to Prometheus to collect and display metrics on vulnerabilities found, resolved, and pending.
+
+\- Implement filters for viewing specific images, date ranges, and vulnerability severity.
+
+\- Test and refine the dashboard for usability and responsiveness.
+
+\- Goal: Provide a user-friendly dashboard that tracks vulnerability history and allows for trend analysis.
+
+**Sprint 5: Advanced Scanner Customization and Exception Handling**
+
+\- Customize the scanner to skip certain vulnerabilities based on user-defined exceptions (e.g., approved known vulnerabilities).
+
+\- Add functionality for rescanning images after a certain period or when vulnerabilities are patched.
+
+\- Implement retry logic and error handling for CI/CD pipeline integration.
+
+\- Test exception handling and ensure that users can manage and track known vulnerabilities.
+
+\- Goal: Make the scanner more flexible, enabling exceptions for approved vulnerabilities and improving error handling.
+
+**Sprint 6: Documentation, Testing, and Final Deployment**
+
+\- Write comprehensive documentation for setup, usage, and troubleshooting.
+
+\- Develop a deployment script for easy setup and configuration.
+
+\- Perform extensive testing on different CI/CD systems GitHub Actions to ensure compatibility.
+
+\- Gather feedback from beta users and make necessary adjustments.
+
+\- Goal: Deliver a production-ready tool with clear documentation, extensive testing, and user feedback integration.
+
+Summary of Deliverables by End of Project
+
+\- Automated Vulnerability Scanner for container images
+
+\- CI/CD Pipeline Integration with vulnerability thresholds and blocking mechanisms
+
+\- Real-Time Notification System for Slack or Teams
+
+\- Web Dashboard for tracking historical vulnerability data and trends
+
+\- Comprehensive documentation covering setup, usage, and maintenance
+
+1\. Develop a vulnerability scanner that automatically scans container images before they are pushed to production, based on known vulnerability databases like the CVE database. 2. Integrate the scanner into popular CI/CD pipelines (e.g., Jenkins, GitHub Actions) to ensure continuous security checks. 3. Generate detailed vulnerability reports and send real-time notifications via Slack or Teams, allowing DevOps teams to take immediate action. 4. Create a user-friendly dashboard that provides a historical view of vulnerabilities detected, resolved, and pending fixes.
+
+Your requirements describe a complete **Container Vulnerability Management Platform** integrated into the DevSecOps lifecycle. Here's a proposed architecture and implementation plan.
+
+# **Solution Overview**
+
+## **Key Features**
+
+### **1. Container Image Vulnerability Scanner**
+
+Automatically scan Docker/OCI images before deployment using vulnerability databases such as:
+
+- Trivy
+
+- Grype
+
+- National Vulnerability Database (NVD/CVE feeds)
+
+- Clair
+
+### **Scan Workflow**
+
+Developer Commit
+
+\|
+
+v
+
+CI/CD Pipeline
+
+\|
+
+v
+
+Build Container Image
+
+\|
+
+v
+
+Vulnerability Scan
+
+\|
+
++--\> Critical/High Found -\> Fail Build
+
+\|
+
++--\> Passed -\> Push to Registry
+
+### **Example Trivy Scan**
+
+trivy image \\
+
+--severity HIGH,CRITICAL \\
+
+--format json \\
+
+-o report.json \\
+
+myapp:latest
+
+# **2. CI/CD Integration**
+
+## **Jenkins Pipeline**
+
+pipeline {
+
+agent any
+
+stages {
+
+stage('Build Image') {
+
+steps {
+
+sh 'docker build -t myapp:\${BUILD_NUMBER} .'
+
+}
+
+}
+
+stage('Security Scan') {
+
+steps {
+
+sh '''
+
+trivy image \\
+
+--severity HIGH,CRITICAL \\
+
+--exit-code 1 \\
+
+myapp:\${BUILD_NUMBER}
+
+'''
+
+}
+
+}
+
+stage('Push Image') {
+
+steps {
+
+sh 'docker push myapp:\${BUILD_NUMBER}'
+
+}
+
+}
+
+}
+
+}
+
+## **GitHub Actions**
+
+name: Container Security Scan
+
+on:
+
+push:
+
+branches:
+
+\- main
+
+jobs:
+
+scan:
+
+runs-on: ubuntu-latest
+
+steps:
+
+\- uses: actions/checkout@v4
+
+\- name: Build Image
+
+run: docker build -t app:\${{ github.sha }} .
+
+\- name: Scan Image
+
+uses: aquasecurity/trivy-action@master
+
+with:
+
+image-ref: app:\${{ github.sha }}
+
+severity: CRITICAL,HIGH
+
+exit-code: '1'
+
+# **3. Notification Engine**
+
+## **Workflow**
+
+Scan Completed
+
+\|
+
++--\> Critical Found
+
+\| \|
+
+\| +--\> Slack Alert
+
+\| +--\> Teams Alert
+
+\|
+
++--\> Store Results
+
+## **Slack Notification**
+
+import requests
+
+def send_slack(webhook_url, message):
+
+payload = {
+
+"text": message
+
+}
+
+requests.post(webhook_url, json=payload)
+
+### **Sample Message**
+
+🚨 Vulnerability Detected
+
+Image: payment-service:1.2.4
+
+Critical: 2
+
+High: 8
+
+Build Failed
+
+View Report:
+
+https://security.company.com/report/123
+
+## **Microsoft Teams Notification**
+
+import requests
+
+def send_teams(webhook, message):
+
+payload = {
+
+"text": message
+
+}
+
+requests.post(webhook, json=payload)
+
+# **4. Backend Architecture**
+
+## **Recommended Technology Stack**
+
+| **Component**     | **Technology**      |
+|-------------------|---------------------|
+| API               | Python FastAPI      |
+| Scanner Engine    | Trivy / Grype       |
+| Database          | PostgreSQL          |
+| Message Queue     | RabbitMQ / Kafka    |
+| Dashboard         | React               |
+| Authentication    | OAuth2 / SSO        |
+| Container Runtime | Docker / Kubernetes |
+| Reporting         | PDF & CSV           |
+
+# **Database Schema**
+
+## **Images**
+
+CREATE TABLE images (
+
+id SERIAL PRIMARY KEY,
+
+image_name VARCHAR(255),
+
+image_tag VARCHAR(100),
+
+scan_date TIMESTAMP
+
+);
+
+## **Vulnerabilities**
+
+CREATE TABLE vulnerabilities (
+
+id SERIAL PRIMARY KEY,
+
+image_id INT,
+
+cve_id VARCHAR(50),
+
+severity VARCHAR(20),
+
+package_name VARCHAR(255),
+
+installed_version VARCHAR(100),
+
+fixed_version VARCHAR(100),
+
+status VARCHAR(20)
+
+);
+
+## **Scan History**
+
+CREATE TABLE scan_history (
+
+id SERIAL PRIMARY KEY,
+
+image_id INT,
+
+critical_count INT,
+
+high_count INT,
+
+medium_count INT,
+
+low_count INT,
+
+scan_time TIMESTAMP
+
+);
+
+# **Dashboard Features**
+
+## **Executive View**
+
+- Total images scanned
+
+- Critical vulnerabilities
+
+- High vulnerabilities
+
+- Resolved vulnerabilities
+
+- Pending remediation
+
+- Compliance score
+
+## **Historical Trends**
+
+Month Critical High
+
+--------------------------------
+
+Jan 120 450
+
+Feb 85 320
+
+Mar 40 190
+
+Apr 18 90
+
+## **Visualizations**
+
+- Vulnerability trends
+
+- Severity distribution
+
+- Top vulnerable repositories
+
+- Mean time to remediation (MTTR)
+
+- CVE aging analysis
+
+# **Kubernetes Admission Control (Optional)**
+
+Prevent deployment of vulnerable images.
+
+### **Policy Example**
+
+apiVersion: kyverno.io/v1
+
+kind: ClusterPolicy
+
+metadata:
+
+name: block-critical-images
+
+spec:
+
+validationFailureAction: Enforce
+
+rules:
+
+\- name: block-critical
+
+match:
+
+resources:
+
+kinds:
+
+\- Pod
+
+validate:
+
+message: "Critical vulnerabilities detected"
+
+deny:
+
+conditions:
+
+all:
+
+\- key: "{{ request.object.metadata.labels.scan-status }}"
+
+operator: Equals
+
+value: "failed"
+
+# **End-to-End Architecture**
+
++----------------+
+
+\| GitHub/Jenkins \|
+
++--------+-------+
+
+\|
+
+v
+
++----------------+
+
+\| Image Build \|
+
++--------+-------+
+
+\|
+
+v
+
++----------------+
+
+\| Trivy/Grype \|
+
++--------+-------+
+
+\|
+
++----------------+----------------+
+
+\| \|
+
+v v
+
++----------------+ +----------------+
+
+\| PostgreSQL \| \| Slack/Teams \|
+
+\| Scan Results \| \| Notifications \|
+
++----------------+ +----------------+
+
+\|
+
+v
+
++-----------------------+
+
+\| FastAPI Backend \|
+
++-----------------------+
+
+\|
+
+v
+
++-----------------------+
+
+\| React Dashboard \|
+
++-----------------------+
+
+### **Expected Outcome**
+
+- Automatic image scanning before production deployment.
+
+- CI/CD pipeline enforcement with build failure on critical findings.
+
+- Real-time Slack/Teams alerts.
+
+- Centralized vulnerability dashboard with historical tracking.
+
+- Compliance-ready reporting and audit trail.
+
+- Optional Kubernetes admission control to block risky deployments.
