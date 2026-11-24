@@ -1,0 +1,5 @@
+# Minimal CI target: no SSH service or generated host private keys.
+# Keep dockerfiles/Dockerfile.malicious for deliberate failure tests.
+FROM alpine:3.22
+LABEL org.opencontainers.image.description="Ephemeral container used for hosted-runner security validation"
+CMD ["/bin/sh", "-c", "echo SecDevOps CI image ready"]
