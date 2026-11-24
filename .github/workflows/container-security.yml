@@ -47,7 +47,7 @@ jobs:
       # Fail pipeline on fixable HIGH or CRITICAL vulnerabilities
       - name: Run Trivy Security Scan
         id: trivy-scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'image'
           image-ref: '${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
@@ -61,7 +61,7 @@ jobs:
       # Sprint 3: Generate JSON vulnerability report
       - name: Generate Structured Vulnerability Report
         if: always()
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'image'
           image-ref: '${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
