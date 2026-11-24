@@ -37,7 +37,7 @@ for IMAGE_NAME in $IMAGES; do
     echo "==== Processing Metrics & Sending Alert for $IMAGE_NAME ==="
     # Note: If your python script expects the filename as an argument, pass it here like:
     # python3 .../generate_report.py "$REPORT_FILE"
-    python3 /home/devsecops/secdevops/reporting/generate_report.py
+    python3 /home/devsecops/secdevops/reporting/generate_report.py "$REPORT_FILE"
 
     echo "Scan report alert sending on slack for $IMAGE_NAME"
 done
