@@ -29,11 +29,8 @@ Containerized applications need secure images before deployment. Today checks ar
 ### Goals
 
 1.  Scan container images automatically before they are pushed to production, using vulnerability databases such as the CVE database.
-
 2.  Integrate the scanner into CI/CD pipelines (Jenkins, GitHub Actions) for continuous security checks.
-
 3.  Generate detailed vulnerability reports and send real-time alerts to Slack or Teams.
-
 4.  Provide a dashboard with a historical view of vulnerabilities detected, resolved and pending fixes.
 
 ## Technology stack
@@ -185,15 +182,12 @@ Pin the scanner action to a released version tag, as above, rather than @master.
 Every completed scan stores its results. A scan with critical findings also sends an alert to Slack, Teams or both.
 
 1.  Scan completes.
-
 2.  If critical or high findings exist, send an alert to Slack and Teams.
-
 3.  Store the results for the dashboard in every case.
 
 ### Slack notification
 
 import requests  
-  
 def send_slack(webhook_url, message):  
 resp = requests.post(webhook_url, json={"text": message}, timeout=10)  
 resp.raise_for_status()
@@ -326,24 +320,6 @@ The project delivers five components by the end of Sprint 6. Together they block
 - A central dashboard tracks vulnerability history.
 - Scan results form a compliance-ready audit trail.
 
-### Optional: Kubernetes admission control
-
-An admission policy can prevent vulnerable images from being deployed. The policy below relies on a scan-status label that the pipeline sets on each pod. Label keys with a hyphen must be quoted in the policy path.
-
-apiVersion: kyverno.io/v1  
-kind: ClusterPolicy  
-metadata:  
-name: block-critical-images  
-spec:  
-validationFailureAction: Enforce  
-rules:  
-- name: block-critical  
-match:  
-resources:  
-kinds:  
-- Pod  
-validate:  
-message: "Critical vulnerabilities detected"  
 deny:  
 conditions:  
 all:  
