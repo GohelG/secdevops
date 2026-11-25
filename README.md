@@ -113,13 +113,9 @@ Every image is scanned in the pipeline. A critical or high finding fails the bui
 The scan runs as a pipeline stage after the image build and before the push. A critical or high finding fails the build, so the image never reaches the registry.
 
 1.  Developer commits code.
-
 2.  The pipeline builds the container image.
-
 3.  Trivy scans the image for HIGH and CRITICAL vulnerabilities.
-
 4.  Critical or high findings fail the build and trigger an alert.
-
 5.  A clean scan pushes the image to the registry.
 
 ### Example Trivy scan
@@ -288,15 +284,10 @@ The dashboard tracks the vulnerability history so teams can see whether critical
 ### Executive view
 
 - Total images scanned
-
 - Critical vulnerabilities
-
 - High vulnerabilities
-
 - Resolved vulnerabilities
-
 - Pending remediation
-
 - Compliance score
 
 ### Historical trend
@@ -310,13 +301,9 @@ The figures above are sample data from the original brief, not live scan results
 ### Planned visualizations
 
 - Vulnerability trends over time
-
 - Severity distribution
-
 - Top vulnerable repositories
-
 - Mean time to remediation (MTTR)
-
 - CVE aging analysis
 
 ## Deliverables and expected outcomes
@@ -326,25 +313,17 @@ The project delivers five components by the end of Sprint 6. Together they block
 ### Deliverables
 
 1.  Automated vulnerability scanner for container images.
-
 2.  CI/CD pipeline integration with vulnerability thresholds and blocking.
-
 3.  Real-time Slack or Teams notification system.
-
 4.  Web dashboard for historical vulnerability data and trends.
-
 5.  Documentation covering setup, usage and maintenance.
 
 ### Expected outcomes
 
 - Images are scanned automatically before production deployment.
-
 - Pipelines fail the build on critical findings.
-
 - Slack or Teams receives real-time alerts.
-
 - A central dashboard tracks vulnerability history.
-
 - Scan results form a compliance-ready audit trail.
 
 ### Optional: Kubernetes admission control
