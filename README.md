@@ -1,20 +1,37 @@
 # Container Image Vulnerability Scanner with Reporting
 
-Nov 23, 2026 · @Saleem Shaikh
+**Nov 23, 2026** · **@Saleem Shaikh**
 
 An automated scanner that checks container images for known CVEs before they reach production, gates CI/CD builds, and reports results to Slack or Teams.
+---
+
+## Contents
+
+- [Project facts](#project-facts)
+- [Problem and goals](#problem-and-goals)
+- [Technology stack](#technology-stack)
+- [Project sprints](#project-sprints)
+- [Solution architecture](#solution-architecture)
+- [CI/CD integration](#cicd-integration)
+- [Notifications](#notifications)
+- [Data model](#data-model)
+- [Dashboard](#dashboard)
+- [Deliverables and expected outcomes](#deliverables-and-expected-outcomes)
+
+---
+
 
 ## Project facts
 
 | Item | Detail |
-|----|----|
+|:---|----|
 | Batch | 16A |
 | Submission date | Oct 31, 2026 |
 | Team | Gautam Gohel, Saleem Shaikh, Punit Patel, Abdulkadir Boxwala |
 | Source repository | [github.com/saleeminfodevops/secdevops](https://github.com/saleeminfodevops/secdevops.git) |
 | Updated document | [Google Doc](https://docs.google.com/document/d/1EQq9ZQ6r5vhlbLKhOe246gi9TYp4PXvanYFe-uUuYBQ/edit?usp=sharing) |
 
-<img src="images/media/image1.png" style="width:6in;height:3.53314in" alt="SecDevOps team page on GitHub listing the four members" />
+![SecDevOps team page on GitHub listing the four members](images/media/image1.png)
 
 *Figure 1. The SecDevOps team page on GitHub, with the four members and the capstone description.*
 
@@ -38,7 +55,7 @@ Containerized applications need secure images before deployment. Today checks ar
 The project uses AWS as the cloud platform, Trivy for scanning, and GitHub Actions for CI/CD. The stack below covers the scanner, pipelines, alerts, storage and dashboard.
 
 | Component | Technology | Purpose |
-|----|----|----|
+|:---|----|:---|
 | Cloud | AWS | Hosting for the scanner and supporting services |
 | Containerization | Docker | Pull, build and scan container images |
 | Scanner | Trivy (Grype as an alternative) | Scan images against CVE data |
@@ -57,7 +74,7 @@ The project uses AWS as the cloud platform, Trivy for scanning, and GitHub Actio
 Six sprints of 20 hours each build the scanner in stages, from a basic scan to a production-ready tool.
 
 | Sprint | Focus | Key tasks | Outcome |
-|----|----|----|----|
+|:---|----|:---|----|
 | 1 | Initial setup and basic scanning | Set up the repository and folder structure; install Trivy; scan sample images; explore CVE integration | Working image scanning with verified output |
 | 2 | CI/CD integration | Automate scans of new images in GitHub Actions; test with sample images | Builds fail when vulnerabilities are detected |
 | 3 | Reports and notifications | Build a report module (PDF, HTML or JSON); integrate the Slack API for summaries and alerts | Structured reports and team notifications |
@@ -67,39 +84,39 @@ Six sprints of 20 hours each build the scanner in stages, from a basic scan to a
 
 ### Sprint tracking in Jira
 
-<img src="images/media/image2.png" style="width:6in;height:3.1984in" alt="Jira backlog showing Sprint 0 work items and their status" />
+![Jira backlog showing Sprint 0 work items and their status](images/media/image2.png)
 
 *Figure 2. The Jira backlog. Sprints 1, 2, 3, 5 and 6 are Done; the dashboard work in Sprint 4 is In Progress.*
 
-<img src="images/media/image3.png" style="width:6in;height:2.97842in" alt="Jira project summary with status overview and recent activity" />
+![Jira project summary with status overview and recent activity](images/media/image3.png)
 
 *Figure 3. The Jira project summary: 18 items completed and 25 updated in the last seven days.*
 
 ### Sprint 1 evidence: repository and scanner setup
 
-<img src="images/media/image4.png" style="width:6in;height:2.91002in" alt="GitHub repository page for secdevops" />
+![GitHub repository page for secdevops](images/media/image4.png)
 
 *Figure 4. The secdevops repository, with folders for the scanner, reporting, dashboard, monitoring and CI files.*
 
-<img src="images/media/image5.png" style="width:6in;height:1.22472in" alt="Terminal output of git clone for the secdevops repository" />
+![Terminal output of git clone for the secdevops repository](images/media/image5.png)
 
 *Figure 5. Cloning the repository.*
 
-<img src="images/media/image6.png" style="width:6in;height:5.8848in" alt="Repository folder tree in the terminal" />
+![Repository folder tree in the terminal](images/media/image6.png)
 
 *Figure 6. The folder structure: scanner, reporting, dashboard, monitoring, docs, and Jenkinsfile and workflow files.*
 
-<img src="images/media/image7.png" style="width:6in;height:2.82243in" alt="Terminal output of trivy --version" />
+![Terminal output of trivy --version](images/media/image7.png)
 
 *Figure 7. Trivy 0.71.2, with the vulnerability database update status.*
 
-<img src="images/media/image8.png" style="width:6in;height:3.18514in" alt="Trivy scan report for ubuntu/nginx:latest" />
+![Trivy scan report for ubuntu/nginx:latest](images/media/image8.png)
 
 *Figure 8. The first Trivy scan of ubuntu/nginx:latest (Ubuntu 25.04). It reports one HIGH finding, CVE-2025-68973 in gpgv, with status fixed.*
 
 ## Solution architecture
 
-<img src="images/media/image9.png" style="width:6in;height:3.23214in" alt="scan and reporting flow · 9 steps, 1 gate" />
+![scan and reporting flow · 9 steps, 1 gate](images/media/image9.png)
 
 scan and reporting flow · 9 steps, 1 gate
 
@@ -117,14 +134,17 @@ The scan runs as a pipeline stage after the image build and before the push. A c
 
 ### Example Trivy scan
 
+```bash
 trivy image \\  
 --severity HIGH,CRITICAL \\  
 --format json \\  
 -o report.json \\  
 myapp:latest
+```
 
 ### Jenkins pipeline
 
+```groovy
 pipeline {  
 agent any  
 stages {  
@@ -146,9 +166,11 @@ steps { sh 'docker push myapp:\${BUILD_NUMBER}' }
 }  
 }  
 }
+```
 
 ### GitHub Actions workflow
 
+```yaml
 name: Container Security Scan  
 on:  
 push:  
@@ -167,15 +189,16 @@ image-ref: app:\${{ github.sha }}
 severity: CRITICAL,HIGH  
 exit-code: '1'
 
-<img src="images/media/image10.png" style="width:6in;height:3.52876in" alt="The container-security.yml workflow open in VS Code" />
+![The container-security.yml workflow open in VS Code](images/media/image10.png)
 
 *Figure 9. The workflow file in the repository. It still uses trivy-action@master, which the pinning note below recommends replacing.*
 
 Pin the scanner action to a released version tag, as above, rather than @master. An unpinned action can change without notice and alter the gate.
 
-<img src="images/media/image11.png" style="width:6in;height:2.9679in" alt="Terminal output of the local scan script on ubuntu:18.04" />
+![Terminal output of the local scan script on ubuntu:18.04](images/media/image11.png)
 
 *Figure 10. A local scan run on ubuntu:18.04. It reports 0 vulnerabilities, but the log also shows a failed-to-parse error when the alert is generated. That step needs a fix.*
+```
 
 ## Notifications
 
@@ -187,33 +210,39 @@ Every completed scan stores its results. A scan with critical findings also send
 
 ### Slack notification
 
+```python
 import requests  
 def send_slack(webhook_url, message):  
 resp = requests.post(webhook_url, json={"text": message}, timeout=10)  
 resp.raise_for_status()
+```
 
 ### Microsoft Teams notification
 
+```python
 import requests  
   
 def send_teams(webhook_url, message):  
 resp = requests.post(webhook_url, json={"text": message}, timeout=10)  
 resp.raise_for_status()
+```
 
 The timeout and status check keep a slow or failing webhook from hanging the pipeline or passing silently.
 
 ### Sample alert
 
+```text
 Vulnerability detected  
 Image: payment-service:1.2.4  
 Critical: 2  
 High: 8  
 Build failed  
 View report: https://security.company.com/report/123
+```
 
 ### Sprint 3 evidence: Slack alerts and report files
 
-<img src="images/media/image12.png" style="width:6in;height:3.4707in" alt="Slack channel with container scan results for five images" />
+![Slack channel with container scan results for five images](images/media/image12.png)
 
 *Figure 11. Slack alerts from the DevSecOps-CapstoneProject app for five images. Trivy reports 3 issues, one of them critical.*
 
@@ -221,15 +250,15 @@ View report: https://security.company.com/report/123
 
 The reporting script reads the Trivy JSON file and sends the summary to Slack. The Slack webhook URL should not be kept in source code. Move it to a CI secret and rotate it, because the URL in this file was exposed. The URLs are redacted in the screenshots below.
 
-<img src="images/media/image13.png" style="width:6in;height:1.4565in" alt="Start of generate_report.py with the Slack webhook redacted" />
+![Start of generate_report.py with the Slack webhook redacted](images/media/image13.png)
 
 *Figure 12. The start of generate_report.py. The webhook line is redacted.*
 
-<img src="images/media/image14.png" style="width:6in;height:4.94962in" alt="generate_report.py reading the report path and parsing the Trivy JSON" />
+![generate_report.py reading the report path and parsing the Trivy JSON](images/media/image14.png)
 
 *Figure 13. generate_report.py takes the report path as an argument and parses the Trivy JSON. The webhook line is redacted.*
 
-<img src="images/media/image15.png" style="width:6in;height:4.94962in" alt="Trivy JSON scan report for vulnerables/web-dvwa:latest" />
+![Trivy JSON scan report for vulnerables/web-dvwa:latest](images/media/image15.png)
 
 *Figure 14. A Trivy JSON report (SchemaVersion 2) for vulnerables/web-dvwa:latest, the input to the reporting script.*
 
@@ -238,11 +267,12 @@ The reporting script reads the Trivy JSON file and sends the summary to Slack. T
 Three PostgreSQL tables hold each image, its findings and its scan history. The schema below adds foreign keys and NOT NULL constraints to the original draft.
 
 | Table | Holds | Key columns |
-|----|----|----|
+|:---|----|:---|
 | images | One row per scanned image | image_name, image_tag, scan_date |
 | vulnerabilities | One row per CVE found in an image | cve_id, severity, package_name, fixed_version, status |
 | scan_history | Severity counts per scan, for trends | critical_count, high_count, medium_count, low_count |
 
+```sql
 CREATE TABLE images (  
 id SERIAL PRIMARY KEY,  
 image_name VARCHAR(255) NOT NULL,  
@@ -270,6 +300,7 @@ medium_count INT NOT NULL DEFAULT 0,
 low_count INT NOT NULL DEFAULT 0,  
 scan_time TIMESTAMP NOT NULL  
 );
+```
 
 ## Dashboard
 
@@ -286,7 +317,7 @@ The dashboard tracks the vulnerability history so teams can see whether critical
 
 ### Historical trend
 
-<img src="images/media/image16.png" style="width:6in;height:2.82143in" alt="sample figures from the original brief · monthly counts, Jan to Apr" />
+![sample figures from the original brief · monthly counts, Jan to Apr](images/media/image16.png)
 
 sample figures from the original brief · monthly counts, Jan to Apr
 
@@ -320,9 +351,12 @@ The project delivers five components by the end of Sprint 6. Together they block
 - A central dashboard tracks vulnerability history.
 - Scan results form a compliance-ready audit trail.
 
+```yaml
 deny:  
 conditions:  
 all:  
 - key: '{{ request.object.metadata.labels."scan-status" }}'  
 operator: Equals  
 value: "failed"
+```
+
